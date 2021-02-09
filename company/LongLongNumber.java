@@ -1,5 +1,6 @@
 package com.company;
 
+import javax.print.attribute.standard.MediaSize;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -14,14 +15,14 @@ public class LongLongNumber {
     //constructor
     public LongLongNumber(boolean empty) {
         if (!empty) {
-            inputNumber();
+            InputNumber();
         }
     }
     public LongLongNumber(int maxSizeRandomValue) {
-        createRandomLongLongNumber(maxSizeRandomValue);
+        CreateRandomLongLongNumber(maxSizeRandomValue);
     }
     public LongLongNumber() {
-        inputNumber();
+        InputNumber();
     }
 
 
@@ -59,92 +60,139 @@ public class LongLongNumber {
     }
 
     //calc operation
-    public LongLongNumber MinAbs(LongLongNumber otherLongNumber) {
-
-        if (this.value.size() < otherLongNumber.getValue().size()) return this;
-        else if (this.value.size() > otherLongNumber.getValue().size()) return otherLongNumber;
-        else {
-            for (int i = 0; i < this.value.size(); i++) {
-                if (this.value.get(i) < otherLongNumber.getValue().get(i)) return this;
-                else if (this.value.get(i) > otherLongNumber.getValue().get(i)) return otherLongNumber;
-            }
-        }
-        return this;
-
-    }
-
-    public LongLongNumber MaxAbs(LongLongNumber otherLongNumber) {
-        if (this.value.size() < otherLongNumber.getValue().size()) return otherLongNumber;
-        else if (this.value.size() > otherLongNumber.getValue().size()) return this;
-        else {
-            for (int i = 0; i < this.value.size(); i++) {
-                if (this.value.get(i) < otherLongNumber.getValue().get(i)) return otherLongNumber;
-                else if (this.value.get(i) > otherLongNumber.getValue().get(i)) return this;
-            }
-        }
-        return otherLongNumber;
-    }
-
     public LongLongNumber Min(LongLongNumber otherLongNumber, boolean considerMinus) {
-        if (!considerMinus) return MinAbs(otherLongNumber); //если учитывать минус не надо, тосравниваем по модулю
-        if (this.minus && !otherLongNumber.getMinus() && considerMinus) return this; //а отрицательно, б положительное значит а меньше
-        else if(!this.minus && otherLongNumber.getMinus() && considerMinus) return otherLongNumber; //а положительное, б отрицательно значит б меньше
-        else {
-            //если оба числа отрицательные
-            if (this.minus && otherLongNumber.getMinus()) {
-                //если длина числа а меньше длины числа б, тогда б меньше
-                if (this.value.size() < otherLongNumber.getValue().size()) return otherLongNumber;
-                    //если длина числа а больше длины числа б, толгда а меньше
-                else if (this.value.size() > otherLongNumber.getValue().size()) return this;
-                    //если их длины равны, то сравниваем поразрядно (начиная со старшего разряда)
-                else {
-                    for (int i = 0; i < this.value.size(); i++) {
-                        //если разряд числа а меньше чем разряд числа б, тогда б меньше
-                        if (this.value.get(i) < otherLongNumber.getValue().get(i)) return otherLongNumber;
-                            //если разряд числа б меньше чем разряд числа а, тогда а меньше
-                        else if (this.value.get(i) > otherLongNumber.getValue().get(i)) return this;
-                    }
-                }
-            }
-            //если оба положительные, тогда смотрим по модулю
-            else {
-                return MinAbs(otherLongNumber);
-            }
-        }
-        //если они равны, то возвращаем число а
-        return this;
-    }
 
-    public LongLongNumber Max(LongLongNumber otherLongNumber, boolean considerMinus) {
-        if (!considerMinus) return MaxAbs(otherLongNumber);
-        if (this.minus && !otherLongNumber.getMinus() && considerMinus) return otherLongNumber; //если число а отрицательное, а число б положительное, тогда б больше
-        else if(!this.minus && otherLongNumber.getMinus() && considerMinus) return this; //если числа а положительное, а число б положительное, тогда а больше
-        else {
-            //если оба числа отрицательные
-            if (this.minus && otherLongNumber.getMinus()) {
-                //если длина числа а меньше длины числа б, тогда а больше
-                if (this.value.size() < otherLongNumber.getValue().size()) return this;
-                    //если длина числа а больше длины числа б, тогда б больше
-                else if (this.value.size() > otherLongNumber.getValue().size()) return otherLongNumber;
-                    //если их длины равны, то сравниваем поразрядно (начиная со старшего разряда)
-                else {
-                    for (int i = 0; i < this.value.size(); i++) {
-                        //если разряд числа а меньше разряда числа б, тогда число а больше
-                        if (this.value.get(i) < otherLongNumber.getValue().get(i)) return this;
-                            //если разряд числа а больше разряда числа б, тогда число б больше
-                        else if (this.value.get(i) > otherLongNumber.getValue().get(i)) return otherLongNumber;
-                    }
-                }
-            }
+        LongLongNumber result = new LongLongNumber(true);
+        result.Copy(this);
+
+        //обычное сравнение
+        if (considerMinus) {
+            //если это число отрицательное, а другое положительное, то это число меньше
+            if (this.minus && !otherLongNumber.getMinus()) result.Copy(this);
+            //если это число положительно, а другое отрицательное, тога другое число больше
+            else if (!this.minus && otherLongNumber.getMinus()) result.Copy(otherLongNumber);
             //если оба числа положительные
-            else {
-                return MaxAbs(otherLongNumber);
+            else if (!this.minus && !otherLongNumber.getMinus()) {
+                if (this.value.size() > otherLongNumber.getValue().size()) result.Copy(otherLongNumber);
+                else if (this.value.size() < otherLongNumber.getValue().size()) result.Copy(this);
+                else if (this.value.size() == otherLongNumber.getValue().size()) {
+                    for (int i = 0; i < this.value.size(); i++) {
+                        if (this.value.get(i) > otherLongNumber.getValue().get(i)) {
+                            result.Copy(otherLongNumber);
+                            break;
+                        }
+                        else if(this.value.get(i) < otherLongNumber.getValue().get(i)) {
+                            result.Copy(this);
+                            break;
+                        }
+                    }
+                }
+            }
+            //если оба числа отрицательные
+            else if (this.minus && otherLongNumber.getMinus()) {
+                if (this.value.size() > otherLongNumber.getValue().size()) result.Copy(this);
+                else if (this.value.size() < otherLongNumber.getValue().size()) result.Copy(otherLongNumber);
+                else if (this.value.size() == otherLongNumber.getValue().size()) {
+                    for (int i = 0; i < this.value.size(); i++) {
+                        if (this.value.get(i) > otherLongNumber.getValue().get(i)) {
+                            result.Copy(this);
+                            break;
+                        }
+                        else if(this.value.get(i) < otherLongNumber.getValue().get(i)) {
+                            result.Copy(otherLongNumber);
+                            break;
+                        }
+                    }
+                }
             }
         }
-        //если они равны, возвращаем число б
-        return otherLongNumber;
-    }
+        //сравнение по модулю (возвращает значение со знаком исходного значения)
+        else {
+            if (this.value.size() > otherLongNumber.getValue().size()) result.Copy(otherLongNumber);
+            else if (this.value.size() < otherLongNumber.getValue().size()) result.Copy(this);
+            else if (this.value.size() == otherLongNumber.getValue().size()) {
+                for (int i = 0; i < this.value.size(); i++) {
+                    if (this.value.get(i) > otherLongNumber.getValue().get(i)) {
+                        result.Copy(otherLongNumber);
+                        break;
+                    }
+                    else if (this.value.get(i) < otherLongNumber.getValue().get(i)) {
+                        result.Copy(this);
+                        break;
+                    }
+                }
+            }
+        }
 
+        return result;
+    }
+    public LongLongNumber Max(LongLongNumber otherLongNumber, boolean considerMinus) {
+
+        LongLongNumber result = new LongLongNumber(true);
+        result.Copy(this);
+
+        //обычное сравнение
+        if (considerMinus) {
+            //если это число отрицательное, а другое положительное, то это число меньше
+            if (this.minus && !otherLongNumber.getMinus()) result.Copy(otherLongNumber);
+                //если это число положительно, а другое отрицательное, тога другое число больше
+            else if (!this.minus && otherLongNumber.getMinus()) result.Copy(this);
+                //если оба числа положительные
+            else if (!this.minus && !otherLongNumber.getMinus()) {
+                if (this.value.size() > otherLongNumber.getValue().size()) result.Copy(this);
+                else if (this.value.size() < otherLongNumber.getValue().size()) result.Copy(otherLongNumber);
+                else if (this.value.size() == otherLongNumber.getValue().size()) {
+                    for (int i = 0; i < this.value.size(); i++) {
+                        if (this.value.get(i) > otherLongNumber.getValue().get(i)) {
+                            result.Copy(this);
+                            break;
+                        }
+                        else if(this.value.get(i) < otherLongNumber.getValue().get(i)) {
+                            result.Copy(otherLongNumber);
+                            break;
+                        }
+                    }
+                }
+            }
+            //если оба числа отрицательные
+            else if (this.minus && otherLongNumber.getMinus()) {
+                if (this.value.size() > otherLongNumber.getValue().size()) result.Copy(otherLongNumber);
+                else if (this.value.size() < otherLongNumber.getValue().size()) result.Copy(this);
+                else if (this.value.size() == otherLongNumber.getValue().size()) {
+                    for (int i = 0; i < this.value.size(); i++) {
+                        if (this.value.get(i) > otherLongNumber.getValue().get(i)) {
+                            result.Copy(otherLongNumber);
+                            break;
+                        }
+                        else if(this.value.get(i) < otherLongNumber.getValue().get(i)) {
+                            result.Copy(this);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        //сравнение по модулю (возвращает значение со знаком исходного значения)
+        else {
+            if (this.value.size() > otherLongNumber.getValue().size()) result.Copy(this);
+            else if (this.value.size() < otherLongNumber.getValue().size()) result.Copy(otherLongNumber);
+            else if (this.value.size() == otherLongNumber.getValue().size()) {
+                for (int i = 0; i < this.value.size(); i++) {
+                    if (this.value.get(i) > otherLongNumber.getValue().get(i)) {
+                        result.Copy(this);
+                        break;
+                    }
+                    else if (this.value.get(i) < otherLongNumber.getValue().get(i)) {
+                        result.Copy(otherLongNumber);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return result;
+
+    }
     public LongLongNumber Sum(LongLongNumber otherLongNumber) {
 
         LongLongNumber result = new LongLongNumber(true);
@@ -195,7 +243,6 @@ public class LongLongNumber {
 
         return result;
     }
-
     public LongLongNumber Sub(LongLongNumber otherLongNumber, boolean isReCall) {
 
         LongLongNumber result = new LongLongNumber(true);
@@ -252,7 +299,7 @@ public class LongLongNumber {
     }
 
     //other
-    private void inputNumber() {
+    private void InputNumber() {
         Scanner scaner = new Scanner(System.in);
         System.out.println("Print long long number: ");
         String stringLongLongNumber = scaner.nextLine();
@@ -270,13 +317,13 @@ public class LongLongNumber {
                 catch (Exception e) {
                     System.out.println("Wrong number. Please try again.");
                     value.clear();
-                    inputNumber();
+                    InputNumber();
                     break;
                 }
             }
         }
     }
-    private void createRandomLongLongNumber(int maxSize) {
+    private void CreateRandomLongLongNumber(int maxSize) {
         Random rnd = new Random();
         int rndSize = rnd.nextInt(maxSize - 1) + 1;
         for (int i = 0; i < rndSize; i++) {
@@ -284,6 +331,10 @@ public class LongLongNumber {
             value.add((byte)digit);
         }
         minus = rnd.nextBoolean();
+    }
+    public void Copy(LongLongNumber otherLongNumber) {
+        this.setValue(otherLongNumber.value);
+        this.setMinus(otherLongNumber.minus);
     }
 
 }
